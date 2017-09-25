@@ -1,0 +1,13 @@
+c:\users\fabian\documents\visual studio 2017\Projects\MasterMarketeer\MasterMarketeer\obj\Debug\MasterMarketeer.MainWindow.resources
+c:\users\fabian\documents\visual studio 2017\Projects\MasterMarketeer\MasterMarketeer\obj\Debug\MasterMarketeer.Properties.Resources.resources
+c:\users\fabian\documents\visual studio 2017\Projects\MasterMarketeer\MasterMarketeer\obj\Debug\MasterMarketeer.csproj.GenerateResource.Cache
+c:\users\fabian\documents\visual studio 2017\Projects\MasterMarketeer\MasterMarketeer\bin\Debug\MasterMarketeer.exe.config
+c:\users\fabian\documents\visual studio 2017\Projects\MasterMarketeer\MasterMarketeer\bin\Debug\MasterMarketeer.exe
+c:\users\fabian\documents\visual studio 2017\Projects\MasterMarketeer\MasterMarketeer\bin\Debug\MasterMarketeer.pdb
+c:\users\fabian\documents\visual studio 2017\Projects\MasterMarketeer\MasterMarketeer\obj\Debug\MasterMarketeer.exe
+c:\users\fabian\documents\visual studio 2017\Projects\MasterMarketeer\MasterMarketeer\obj\Debug\MasterMarketeer.pdb
+c:\users\fabian\documents\visual studio 2017\Projects\MasterMarketeer\MasterMarketeer\bin\Debug\WindowsAccessBridgeInterop.dll
+c:\users\fabian\documents\visual studio 2017\Projects\MasterMarketeer\MasterMarketeer\bin\Debug\WindowsAccessBridgeInterop.pdb
+C:\Users\Fabian\documents\visual studio 2017\Projects\MasterMarketeer\MasterMarketeer\bin\Debug\App.config
+C:\Users\Fabian\documents\visual studio 2017\Projects\MasterMarketeer\MasterMarketeer\bin\Debug\ServiceStack.Text.dll
+C:\Users\Fabian\documents\visual studio 2017\Projects\MasterMarketeer\MasterMarketeer\bin\Debug\ServiceStack.Text.xml

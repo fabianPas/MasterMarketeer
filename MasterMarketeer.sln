@@ -1,0 +1,22 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.26430.6
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MasterMarketeer", "MasterMarketeer\MasterMarketeer.csproj", "{934B896E-C2F5-42F6-B5C2-6AE423A2301E}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{934B896E-C2F5-42F6-B5C2-6AE423A2301E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{934B896E-C2F5-42F6-B5C2-6AE423A2301E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{934B896E-C2F5-42F6-B5C2-6AE423A2301E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{934B896E-C2F5-42F6-B5C2-6AE423A2301E}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Configuration;
@@ -22,6 +22,7 @@ namespace MasterMarketeer
         const int WM_GETTEXT = 0x000D;
         const int WM_GETTEXTLENGTH = 0x000E;
 
+        //left these in just incase being used in future / something else.
         // SendMessage overload.
         [DllImport("User32.dll")]
         public static extern Int32 SendMessage(int hWnd, int Msg, int wParam, int lParam);
@@ -30,26 +31,6 @@ namespace MasterMarketeer
         [DllImport("User32.dll")]
         public static extern Int32 SendMessage(int hWnd, int Msg, int wParam, StringBuilder lParam);
 
-        // The GetClassName function takes a handle as a parameter as well as a StringBuilder
-        // and the max capacity of the StringBuilder as parameters. It'll return the windows
-        // class name by filling up the StringBuilder - though not any longer than the max capacity.
-        // If the class is longer than the max capacity it will simply be cropped. Having a larger
-        // capacity than necessary is simply a matter of performance.
-        [DllImport("User32.Dll")]
-        public static extern void GetClassName(int hWnd, StringBuilder s, int nMaxCount);
-
-        // The EnumWindows function will enumerate all windows in the system. Each window will cause
-        // the PCallBack callback function to be called.
-        [DllImport("user32.Dll")]
-        static extern bool EnumWindows(WindowCallback callback, int lParam);
-
-        /// <summary>
-        /// This is the delegate that sets the signature for the callback function of the EnumWindows function.
-        /// </summary>
-        /// <param name="hwnd"></param>
-        /// <param name="lParam"></param>
-        /// <returns></returns>
-        private delegate bool WindowCallback(int hwnd, int lParam);
 
         /// <summary>
         /// The access bridge
@@ -82,27 +63,21 @@ namespace MasterMarketeer
             _currentIsland = currentIsland;
         }
 
-        private bool EnumerateWindowsCallback(int handle, int lParam)
-        {
-            // First we'll find the class of the window as that is usually the parameter that narrows our search down the furthest.
-            // As classes are usually rather short, a capacity of 256 ought to be plenty.
-            var sbClass = new StringBuilder(256);
-            GetClassName(handle, sbClass, sbClass.Capacity);
-
-            // As explained in an earlier blog we then get the text of the window.
-            var txtLength = SendMessage(handle, WM_GETTEXTLENGTH, 0, 0);
-            var sbText = new StringBuilder(txtLength + 1);
-            SendMessage(handle, WM_GETTEXT, sbText.Capacity, sbText);
-
-            if (sbText.ToString().Contains("on the Obsidian ocean"))
-                _windowHandle = new IntPtr(handle);
-
-            return true;
-        }
 
         public void Collect()
         {
-            EnumWindows(EnumerateWindowsCallback, 0);
+            //fetch process handle by matching window title -- can be made more specific to avoid collision with webbrowsers. 
+            Process[] processes = Process.GetProcesses();
+            foreach (Process proc in processes)
+            {
+
+                if (proc.MainWindowTitle.Contains("Puzzle Pirates") && proc.MainWindowTitle.Contains("ocean"))
+                {
+                    _windowHandle = proc.MainWindowHandle;
+                    break;
+                }
+            }
+
             if (_windowHandle == null)
                 return;
 
@@ -116,24 +91,58 @@ namespace MasterMarketeer
             if (_commodityNode == null)
                 return;
 
-            
 
             var commodityMarket = new CommodityMarket();
             commodityMarket.Island = _currentIsland;
             commodityMarket.Rows = new List<MarketRow>();
 
-            for (int i = 0; i < _commodityNode.GetInfo().childrenCount - 6; i = i + 6)
+             bool isInventory = false;
+            var parent = _commodityNode.GetParent().GetParent();
+            if(FindNodePropertyValue(parent, "Role") == "scroll pane")
             {
-                var row = new MarketRow();
+                //get child in scrollpane; should be vp for labels!
+                
+                if(((AccessibleContextNode)parent).GetInfo().childrenCount >= 4)
+                {
+                    var vpChildren = ((AccessibleContextNode)parent).FetchChildNode(3);
+                    if(FindNodePropertyValue(vpChildren, "Role") == "viewport")
+                    {
+                        var panel = ((AccessibleContextNode)vpChildren).FetchChildNode(0);
+                        if (FindNodePropertyValue(panel, "Role") == "panel" && ((AccessibleContextNode)panel).GetInfo().childrenCount >= 7 )
+                        {
+                            var label = ((AccessibleContextNode)panel).FetchChildNode(6);
+                            string name = FindNodePropertyValue(label, "Name");
+                            if (FindNodePropertyValue(label, "Name") == "Ye hold")
+                            {
+                                isInventory = true;
+                            }
+                        }
+                    }
+                }
+            }
+             
+            int incr = 6;
+            if (isInventory)
+                incr = 7;
+            
+            JavaObjectHandle jHandle = _commodityNode.AccessibleContextHandle;
+            int JvmId = jHandle.JvmId;
+            
+            int m = _commodityNode.GetInfo().childrenCount - incr;
+            for (int i = 0; i < m; i+= incr)
+            {
 
-                row.Commodity = _commodityNode.FetchChildNode(i).GetValue();
-                row.Outlet = _commodityNode.FetchChildNode(i + 1).GetValue();
-                row.BuyPrice = _commodityNode.FetchChildNode(i + 2).GetInteger();
-                row.WillBuy = _commodityNode.FetchChildNode(i + 3).GetInteger();
-                row.SellPrice = _commodityNode.FetchChildNode(i + 4).GetInteger();
-                row.WillSell = _commodityNode.FetchChildNode(i + 5).GetInteger();
+                commodityMarket.Rows.Add(new MarketRow()
+                {
+                    Commodity = GetValueOfName(_accessBridge.Functions.GetAccessibleChildFromContext(JvmId, jHandle, i)),
+                    Outlet = GetValueOfName(_accessBridge.Functions.GetAccessibleChildFromContext(JvmId, jHandle, i+1)),
+                    BuyPrice = GetIntValueOfName(_accessBridge.Functions.GetAccessibleChildFromContext(JvmId, jHandle, i+2)),
+                    WillBuy = GetIntValueOfName(_accessBridge.Functions.GetAccessibleChildFromContext(JvmId, jHandle, i + 3)),
+                    SellPrice = GetIntValueOfName(_accessBridge.Functions.GetAccessibleChildFromContext(JvmId, jHandle, i + 4)),
+                    WillSell = GetIntValueOfName(_accessBridge.Functions.GetAccessibleChildFromContext(JvmId, jHandle, i + 5)),
+                    //ye hold would be i+6
 
-                commodityMarket.Rows.Add(row);
+                });
             }
 
             var outputFormat = (string)Properties.Settings.Default["output_format"];
@@ -152,14 +161,24 @@ namespace MasterMarketeer
 
             OnFinishCollecting?.Invoke(this, new EventArgs());
         }
-
+        private string FindNodePropertyValue(AccessibleNode node, string name)
+        {
+            var properties = node.GetProperties(PropertyOptions.AccessibleContextInfo);
+            foreach (var property in properties)
+            {
+                if (property.Name == name)
+                    return (string)property.Value;
+            }
+            return null;
+            
+        }
         private void FindCommodityMarketNode(AccessibleNode node)
         {
             var properties = node.GetProperties(PropertyOptions.AccessibleContextInfo);
 
             foreach (var property in properties)
             {
-                if (property.Name == "Role" && (string) property.Value == "table")
+                 if (property.Name == "Role" && (string) property.Value == "table" && ((AccessibleContextNode)node).GetInfo().childrenCount > 100)
                     _commodityNode = (AccessibleContextNode)node;
             }
 
@@ -167,5 +186,49 @@ namespace MasterMarketeer
             foreach (var child in children)
                 FindCommodityMarketNode(child);
         }
-    }
+        public string GetValueOfName(JavaObjectHandle handle)
+        {
+            AccessibleContextInfo info;
+            if (_accessBridge.Functions.GetAccessibleContextInfo(handle.JvmId, handle, out info))
+            {
+                return info.name;
+
+            }
+            return null;
+        }
+
+        public string GetValueOfName(AccessibleContextNode node)
+        {
+            AccessibleContextInfo info;
+            if (_accessBridge.Functions.GetAccessibleContextInfo(node.AccessibleContextHandle.JvmId, node.AccessibleContextHandle, out info))
+            {
+                return info.name;
+
+            }
+            return null;
+        }
+
+        public int GetIntValueOfName(JavaObjectHandle handle)
+        {
+            string value = GetValueOfName(handle);
+            if (string.IsNullOrWhiteSpace(value))
+                return 0;
+
+            if (value == ">1000")
+                return 1000;
+
+            return int.Parse(value);
+        }
+        public int GetIntValueOfName(AccessibleContextNode node)
+        {
+            string value = GetValueOfName(node);
+            if (string.IsNullOrWhiteSpace(value))
+                return 0;
+
+            if (value == ">1000")
+                return 1000;
+
+            return int.Parse(value);
+        }
+    }    
 }

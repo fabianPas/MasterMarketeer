@@ -178,7 +178,7 @@ namespace MasterMarketeer
 
             foreach (var property in properties)
             {
-                if (property.Name == "Role" && (string) property.Value == "table")
+                 if (property.Name == "Role" && (string) property.Value == "table" && ((AccessibleContextNode)node).GetInfo().childrenCount > 100)
                     _commodityNode = (AccessibleContextNode)node;
             }
 
@@ -186,9 +186,7 @@ namespace MasterMarketeer
             foreach (var child in children)
                 FindCommodityMarketNode(child);
         }
-    }
-    
-            public string GetValueOfName(JavaObjectHandle handle)
+        public string GetValueOfName(JavaObjectHandle handle)
         {
             AccessibleContextInfo info;
             if (_accessBridge.Functions.GetAccessibleContextInfo(handle.JvmId, handle, out info))
@@ -209,7 +207,7 @@ namespace MasterMarketeer
             }
             return null;
         }
-        
+
         public int GetIntValueOfName(JavaObjectHandle handle)
         {
             string value = GetValueOfName(handle);
@@ -232,5 +230,5 @@ namespace MasterMarketeer
 
             return int.Parse(value);
         }
-    
+    }    
 }

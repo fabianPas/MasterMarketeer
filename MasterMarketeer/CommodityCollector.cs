@@ -124,18 +124,22 @@ namespace MasterMarketeer
             int incr = 6;
             if (isInventory)
                 incr = 7;
+            
+            JavaObjectHandle jHandle = _commodityNode.AccessibleContextHandle;
+            int JvmId = jHandle.JvmId;
+            
             int m = _commodityNode.GetInfo().childrenCount - incr;
             for (int i = 0; i < m; i+= incr)
             {
 
                 commodityMarket.Rows.Add(new MarketRow()
                 {
-                    Commodity = _commodityNode.FetchChildNode(i).GetValue(),
-                    Outlet = _commodityNode.FetchChildNode(i + 1).GetValue(),
-                    BuyPrice = _commodityNode.FetchChildNode(i + 2).GetInteger(),
-                    WillBuy = _commodityNode.FetchChildNode(i + 3).GetInteger(),
-                    SellPrice = _commodityNode.FetchChildNode(i + 4).GetInteger(),
-                    WillSell = _commodityNode.FetchChildNode(i + 5).GetInteger(),
+                    Commodity = GetValueOfName(_accessBridge.Functions.GetAccessibleChildFromContext(JvmId, jHandle, i)),
+                    Outlet = GetValueOfName(_accessBridge.Functions.GetAccessibleChildFromContext(JvmId, jHandle, i+1)),
+                    BuyPrice = GetIntValueOfName(_accessBridge.Functions.GetAccessibleChildFromContext(JvmId, jHandle, i+2)),
+                    WillBuy = GetIntValueOfName(_accessBridge.Functions.GetAccessibleChildFromContext(JvmId, jHandle, i + 3)),
+                    SellPrice = GetIntValueOfName(_accessBridge.Functions.GetAccessibleChildFromContext(JvmId, jHandle, i + 4)),
+                    WillSell = GetIntValueOfName(_accessBridge.Functions.GetAccessibleChildFromContext(JvmId, jHandle, i + 5)),
                     //ye hold would be i+6
 
                 });
@@ -183,4 +187,50 @@ namespace MasterMarketeer
                 FindCommodityMarketNode(child);
         }
     }
+    
+            public string GetValueOfName(JavaObjectHandle handle)
+        {
+            AccessibleContextInfo info;
+            if (_accessBridge.Functions.GetAccessibleContextInfo(handle.JvmId, handle, out info))
+            {
+                return info.name;
+
+            }
+            return null;
+        }
+
+        public string GetValueOfName(AccessibleContextNode node)
+        {
+            AccessibleContextInfo info;
+            if (_accessBridge.Functions.GetAccessibleContextInfo(node.AccessibleContextHandle.JvmId, node.AccessibleContextHandle, out info))
+            {
+                return info.name;
+
+            }
+            return null;
+        }
+        
+        public int GetIntValueOfName(JavaObjectHandle handle)
+        {
+            string value = GetValueOfName(handle);
+            if (string.IsNullOrWhiteSpace(value))
+                return 0;
+
+            if (value == ">1000")
+                return 1000;
+
+            return int.Parse(value);
+        }
+        public int GetIntValueOfName(AccessibleContextNode node)
+        {
+            string value = GetValueOfName(node);
+            if (string.IsNullOrWhiteSpace(value))
+                return 0;
+
+            if (value == ">1000")
+                return 1000;
+
+            return int.Parse(value);
+        }
+    
 }

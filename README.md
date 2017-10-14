@@ -15,6 +15,12 @@ A [Puzzle Pirates Dark Seas](store.steampowered.com/app/552110/Puzzle_Pirates_Da
 
 By default a JSON file will be exported, but also CSV files are supported. If you want to use CSV files instead, open up the `exe.config` file and change the `json` value to `csv`.
 
+#### Troubleshooting
+
+If the MasterMarketeer throws an error, it could be that the Java Access Bridge is not enabled on your system yet. Run the following command to enable the Java Access Bridge. Make sure to restart YPP after if it wasn't shutdown yet.
+
+```C:\Program Files (x86)\Java\%JRE_HOME%\bin\jabswitch -enable```
+
 ### Thanks 
 
 For using the JAB the [Access Bridge Explorer](https://github.com/google/access-bridge-explorer) is used.
@@ -22,6 +28,3 @@ For using the JAB the [Access Bridge Explorer](https://github.com/google/access-
 ### In-game
 
 My in-game name is Fender. Feel free to hit me up with any questions regarding the application. Ye can always tip me aswell, yarr ;)
-
-
-

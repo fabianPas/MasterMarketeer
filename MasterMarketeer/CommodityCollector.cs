@@ -95,9 +95,37 @@ namespace MasterMarketeer
             var commodityMarket = new CommodityMarket();
             commodityMarket.Island = _currentIsland;
             commodityMarket.Rows = new List<MarketRow>();
-  
-            int m = _commodityNode.GetInfo().childrenCount - 6;
-            for (int i = 0; i < m; i+= 6)
+
+             bool isInventory = false;
+            var parent = _commodityNode.GetParent().GetParent();
+            if(FindNodePropertyValue(parent, "Role") == "scroll pane")
+            {
+                //get child in scrollpane; should be vp for labels!
+                
+                if(((AccessibleContextNode)parent).GetInfo().childrenCount >= 4)
+                {
+                    var vpChildren = ((AccessibleContextNode)parent).FetchChildNode(3);
+                    if(FindNodePropertyValue(vpChildren, "Role") == "viewport")
+                    {
+                        var panel = ((AccessibleContextNode)vpChildren).FetchChildNode(0);
+                        if (FindNodePropertyValue(panel, "Role") == "panel" && ((AccessibleContextNode)panel).GetInfo().childrenCount >= 7 )
+                        {
+                            var label = ((AccessibleContextNode)panel).FetchChildNode(6);
+                            string name = FindNodePropertyValue(label, "Name");
+                            if (FindNodePropertyValue(label, "Name") == "Ye hold")
+                            {
+                                isInventory = true;
+                            }
+                        }
+                    }
+                }
+            }
+             
+            int incr = 6;
+            if (isInventory)
+                incr = 7;
+            int m = _commodityNode.GetInfo().childrenCount - incr;
+            for (int i = 0; i < m; i+= incr)
             {
 
                 commodityMarket.Rows.Add(new MarketRow()
@@ -108,6 +136,7 @@ namespace MasterMarketeer
                     WillBuy = _commodityNode.FetchChildNode(i + 3).GetInteger(),
                     SellPrice = _commodityNode.FetchChildNode(i + 4).GetInteger(),
                     WillSell = _commodityNode.FetchChildNode(i + 5).GetInteger(),
+                    //ye hold would be i+6
 
                 });
             }
@@ -128,7 +157,17 @@ namespace MasterMarketeer
 
             OnFinishCollecting?.Invoke(this, new EventArgs());
         }
-
+        private string FindNodePropertyValue(AccessibleNode node, string name)
+        {
+            var properties = node.GetProperties(PropertyOptions.AccessibleContextInfo);
+            foreach (var property in properties)
+            {
+                if (property.Name == name)
+                    return (string)property.Value;
+            }
+            return null;
+            
+        }
         private void FindCommodityMarketNode(AccessibleNode node)
         {
             var properties = node.GetProperties(PropertyOptions.AccessibleContextInfo);
